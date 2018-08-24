@@ -1,2 +1,2 @@
 language: cpp
-script: make bint && ./bint
+script: make bint && ./build/bint
