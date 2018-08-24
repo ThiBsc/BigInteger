@@ -33,8 +33,8 @@ BigInteger C++ implementation. [![Build Status](https://travis-ci.org/thibDev/Bi
 - [ ] swap
 - [ ] operator+, operator-, operator*, operator/
 - [ ] operator+=, operator-=, operator*=, operator/=
-- [ ] operator<, operator>, operator<=, operator>=
-- [ ] operator<<
+- [x] operator<, operator>, operator<=, operator>=
+- [x] operator<<
 
 ## Code sample
 
@@ -53,7 +53,7 @@ a.multiply(b); // 156
 
 ```shell
 make bint
-./bint
+./build/bint
 ```
 
 ## Support development :+1:

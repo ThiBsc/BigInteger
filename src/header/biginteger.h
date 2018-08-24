@@ -29,6 +29,8 @@ public:
     /**
      * Complex arithmetic
      */
+    BigInteger pow(const BigInteger& bi) const;
+    BigInteger modulus(const BigInteger& bi) const;
 
     /**
      * Modification & Checking
@@ -43,6 +45,8 @@ public:
     bool operator==(const BigInteger& bi);
     bool operator<(const BigInteger& bi);
     bool operator>(const BigInteger& bi);
+    bool operator<=(const BigInteger& bi);
+    bool operator>=(const BigInteger& bi);
     friend std::ostream& operator<<(std::ostream& stream, const BigInteger& bi){
         stream << bi.toString();
         return stream;

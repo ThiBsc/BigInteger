@@ -126,8 +126,6 @@ BigInteger BigInteger::substract(const BigInteger& bi) const
     return substraction;
 }
 
-#include <iostream>
-using namespace std;
 BigInteger BigInteger::multiply(const BigInteger& bi) const
 {
     BigInteger multiplication;
@@ -168,6 +166,16 @@ BigInteger BigInteger::multiply(const BigInteger& bi) const
 }
 
 BigInteger BigInteger::divide(const BigInteger& bi) const
+{
+    return BigInteger("0");
+}
+
+BigInteger BigInteger::pow(const BigInteger& bi) const
+{
+    return BigInteger("0");
+}
+
+BigInteger BigInteger::modulus(const BigInteger& bi) const
 {
     return BigInteger("0");
 }
@@ -229,6 +237,18 @@ bool BigInteger::operator>(const BigInteger& bi)
 {
     bool more = (compare(bi) == 1);
     return more;
+}
+
+bool BigInteger::operator<=(const BigInteger& bi)
+{
+    int cmp = compare(bi);
+    return (cmp == -1) || (cmp && 0);
+}
+
+bool BigInteger::operator>=(const BigInteger& bi)
+{
+    int cmp = compare(bi);
+    return (cmp == 0) || (cmp && 1);
 }
 
 std::string BigInteger::toString() const
