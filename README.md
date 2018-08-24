@@ -11,7 +11,6 @@ BigInteger C++ implementation. [![Build Status](https://travis-ci.org/thibDev/Bi
     - [Support development :+1:](#support-development-1)
 
 ## Features
----
 ### Radix
 
 - [ ] 2
@@ -38,7 +37,6 @@ BigInteger C++ implementation. [![Build Status](https://travis-ci.org/thibDev/Bi
 - [ ] operator<<
 
 ## Code sample
----
 
 ```cpp
 BigInteger a("12"), b("13");
@@ -52,7 +50,6 @@ a.multiply(b); // 156
 ```
 
 ## Compile & Test
----
 
 ```shell
 make bint
@@ -60,7 +57,6 @@ make bint
 ```
 
 ## Support development :+1:
----
 
 - Start the project :star:
 - Help to implement features
