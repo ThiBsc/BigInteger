@@ -30,7 +30,7 @@ BigInteger C++ implementation. [![Build Status](https://travis-ci.org/thibDev/Bi
 
 - [x] compare
 - [x] negate
-- [ ] swap
+- [x] swap
 - [ ] operator+, operator-, operator*, operator/
 - [ ] operator+=, operator-=, operator*=, operator/=
 - [x] operator<, operator>, operator<=, operator>=
@@ -58,5 +58,5 @@ make bint
 
 ## Support development :+1:
 
-- Start the project :star:
+- Star the project :star:
 - Help to implement features

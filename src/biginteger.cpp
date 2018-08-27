@@ -215,9 +215,43 @@ BigInteger BigInteger::negate() const
     return BigInteger((this->m_signed ? value : value.insert(0, 1, '-')));
 }
 
+void BigInteger::swap(BigInteger &bi)
+{
+	BigInteger tmp = (*this);
+	(*this) = bi;
+	bi = tmp;
+}
+
+BigInteger BigInteger::operator+(const BigInteger& bi)
+{
+    return this->add(bi);
+}
+
+BigInteger BigInteger::operator-(const BigInteger& bi)
+{
+    return this->substract(bi);
+}
+
+BigInteger BigInteger::operator*(const BigInteger& bi)
+{
+    return this->multiply(bi);
+}
+
 BigInteger& BigInteger::operator+=(const BigInteger& bi)
 {
     (*this) = add(bi);
+    return (*this);
+}
+
+BigInteger& BigInteger::operator-=(const BigInteger& bi)
+{
+    (*this) = substract(bi);
+    return (*this);
+}
+
+BigInteger& BigInteger::operator*=(const BigInteger& bi)
+{
+    (*this) = multiply(bi);
     return (*this);
 }
 

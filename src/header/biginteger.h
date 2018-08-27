@@ -37,11 +37,17 @@ public:
      */
     int compare(const BigInteger& bi) const;
     BigInteger negate() const;
+    void swap(BigInteger& bi);
 
     /**
      * Operator
      */
+    BigInteger operator+(const BigInteger& bi);
+    BigInteger operator-(const BigInteger& bi);
+    BigInteger operator*(const BigInteger& bi);
     BigInteger& operator+=(const BigInteger& bi);
+    BigInteger& operator-=(const BigInteger& bi);
+    BigInteger& operator*=(const BigInteger& bi);
     bool operator==(const BigInteger& bi);
     bool operator<(const BigInteger& bi);
     bool operator>(const BigInteger& bi);
