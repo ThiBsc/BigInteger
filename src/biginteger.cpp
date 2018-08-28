@@ -1,5 +1,9 @@
 #include "header/biginteger.h"
 
+BigInteger BigInteger::ZERO = BigInteger("0", 10);
+BigInteger BigInteger::ONE = BigInteger("1", 10);
+BigInteger BigInteger::TEN = BigInteger("10", 10);
+
 BigInteger::BigInteger()
     : m_radix(10)
     , m_signed(false)
@@ -16,12 +20,25 @@ BigInteger::BigInteger(std::string value, int radix)
         m_signed = true;
         value.erase(0, 1);
     }
+    // remove leading 0
+    while (value.front()=='0' && value.length()!=1){
+        value.erase(0, 1);
+    }
     if (radix == 10){
         m_value = value;
     } else {
         // convert to base 10 to use trivial algorithm
-        // ...
-        // m_value(converted_value);
+        char clast = value.back();
+        int last = ( (0<=(clast-'0')) && ((clast-'0')<=9) ? (clast-'0') : (tolower(clast)-'a')+10 );
+        int valLength = value.length();
+        BigInteger pow = BigInteger(std::to_string(valLength-1));
+        BigInteger converted_value(std::to_string(last)), bi_radix(std::to_string(radix));
+        for (int i=0; i<valLength-1; i++){
+            char c = value.at(i);
+            int cur_val = ( (0<=(c-'0')) && ((c-'0')<=9) ? (c-'0') : (tolower(c)-'a')+10 );
+            converted_value += BigInteger(std::to_string(cur_val)).multiply(bi_radix.pow(pow--));
+        }
+        (*this) = (m_signed ? converted_value.negate() : converted_value);
     }
 }
 
@@ -172,7 +189,19 @@ BigInteger BigInteger::divide(const BigInteger& bi) const
 
 BigInteger BigInteger::pow(const BigInteger& bi) const
 {
-    return BigInteger("0");
+    BigInteger ret;
+    if (ZERO == bi){
+        ret = ONE;
+    } else if (ONE == bi){
+        ret = (*this);
+    } else {
+        BigInteger initial_value = (*this);
+        ret = (*this);
+        for (BigInteger i=ONE; i<bi; i++){
+            ret *= initial_value;
+        }
+    }
+    return ret;
 }
 
 BigInteger BigInteger::modulus(const BigInteger& bi) const
@@ -253,6 +282,32 @@ BigInteger& BigInteger::operator*=(const BigInteger& bi)
 {
     (*this) = multiply(bi);
     return (*this);
+}
+
+BigInteger& BigInteger::operator--()
+{
+    (*this) = substract(ONE);
+    return (*this);
+}
+
+BigInteger BigInteger::operator--(int)
+{
+    BigInteger before_minus = (*this);
+    (*this) = substract(ONE);
+    return before_minus;
+}
+
+BigInteger& BigInteger::operator++()
+{
+    (*this) = add(ONE);
+    return (*this);
+}
+
+BigInteger BigInteger::operator++(int)
+{
+    BigInteger before_plus = (*this);
+    (*this) = add(ONE);
+    return before_plus;
 }
 
 bool BigInteger::operator==(const BigInteger& bi)

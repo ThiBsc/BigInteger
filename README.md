@@ -13,9 +13,7 @@ BigInteger C++ implementation. [![Build Status](https://travis-ci.org/thibDev/Bi
 ## Features
 ### Radix
 
-- [ ] 2
-- [x] 10
-- [ ] 16
+From 2 to 16
 
 ### Arithmetic
 
@@ -23,7 +21,7 @@ BigInteger C++ implementation. [![Build Status](https://travis-ci.org/thibDev/Bi
 - [x] substract
 - [x] multiply
 - [ ] divide
-- [ ] pow
+- [x] pow
 - [ ] modulus
 
 ### Modification & Checking/Operator
@@ -31,6 +29,7 @@ BigInteger C++ implementation. [![Build Status](https://travis-ci.org/thibDev/Bi
 - [x] compare
 - [x] negate
 - [x] swap
+- [x] operator--, ++ (post, pre)
 - [ ] operator+, operator-, operator*, operator/
 - [ ] operator+=, operator-=, operator*=, operator/=
 - [x] operator<, operator>, operator<=, operator>=
@@ -39,14 +38,16 @@ BigInteger C++ implementation. [![Build Status](https://travis-ci.org/thibDev/Bi
 ## Code sample
 
 ```cpp
-BigInteger a("12"), b("13");
+BigInteger bin("1011", 2); // 11
+BigInteger oct("13", 8); // 11
+BigInteger dec("255", 10); // 255
+BigInteger hex("ff", 16); // 255
 // Use with cout to print result
-a.add(b); // 25
-a.substract(b); // -1
-a.multiply(b); // 156
-(a<b); // True
-(a>b); // False
-(a==b); // False
+bin.add(oct); // 22
+dec.substract(hex); // 0
+bin.multiply(hex); // 2805
+dec.pow(BigInteger::TEN); // 1 162 523 670 191 533 212 890 625
+BigInteger("2").substract("-3"); // (2)-(-3) = 2+3 = 5
 ```
 
 ## Compile & Test

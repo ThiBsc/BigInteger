@@ -7,6 +7,7 @@
 #include <ostream>
 #include <sstream>
 #include <vector>
+#include <cctype>
 
 /**
 * BigInteger C++ implementation
@@ -17,6 +18,10 @@ public:
     BigInteger();
     BigInteger(std::string value, int radix = 10);
     ~BigInteger();
+
+    static BigInteger ZERO;
+    static BigInteger ONE;
+    static BigInteger TEN;    
 
     /**
      * Elementary arithmetic
@@ -48,6 +53,10 @@ public:
     BigInteger& operator+=(const BigInteger& bi);
     BigInteger& operator-=(const BigInteger& bi);
     BigInteger& operator*=(const BigInteger& bi);
+    BigInteger& operator--(); // pre
+    BigInteger operator--(int); // post
+    BigInteger& operator++(); // pre
+    BigInteger operator++(int); // post
     bool operator==(const BigInteger& bi);
     bool operator<(const BigInteger& bi);
     bool operator>(const BigInteger& bi);

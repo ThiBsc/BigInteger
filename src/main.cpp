@@ -7,20 +7,21 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
     // Samples
-    BigInteger a("12"), b("13");
-    
-    cout << a << "+" << b << " = " << a.add(b) << endl;
-    cout << a << "-" << b << " = " << a.substract(b) << endl;
-    cout << a << "*" << b << " = " << a.multiply(b) << endl;
-    cout << a << "<" << b << " = " << (a<b) << endl;
-    cout << a << ">" << b << " = " << (a>b) << endl;
-    cout << a << "=" << b << " : " << (a==b) << endl;
+    BigInteger bin("1011", 2); // 11
+    BigInteger oct("13", 8); // 11
+    BigInteger dec("255", 10); // 255
+    BigInteger hex("ff", 16); // 255
 
-    // More
-    assert(BigInteger("-2").add(BigInteger("3")) == BigInteger("1")); // (-2)+(3)
-    assert(BigInteger("10").substract(BigInteger("-3")) == BigInteger("13")); // (10)-(-3)
-    assert(BigInteger("123").multiply(BigInteger("456")) == BigInteger("56088")); // (123)*(456)
-    assert(BigInteger("-123").multiply(BigInteger("456")) == BigInteger("-56088")); // (-123)*(456)
+    cout << bin << endl;
+    cout << oct << endl;
+    cout << dec << endl;
+    cout << hex << endl;
+    
+    // Check
+    assert(bin.add(oct) == BigInteger("22"));
+    assert(dec.substract(hex) == BigInteger::ZERO);
+    assert(bin.multiply(hex) == BigInteger("2805"));
+    assert(dec.pow(BigInteger::TEN) == BigInteger("1162523670191533212890625"));
 
     return 0;
 }
