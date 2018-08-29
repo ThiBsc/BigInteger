@@ -42,6 +42,9 @@ public:
      */
     int compare(const BigInteger& bi) const;
     BigInteger negate() const;
+    BigInteger absolute() const;
+    bool isPositive() const;
+    bool isNegative() const;
     void swap(BigInteger& bi);
 
     /**
@@ -50,9 +53,12 @@ public:
     BigInteger operator+(const BigInteger& bi);
     BigInteger operator-(const BigInteger& bi);
     BigInteger operator*(const BigInteger& bi);
+    BigInteger operator/(const BigInteger& bi);
+    BigInteger operator%(const BigInteger& bi);
     BigInteger& operator+=(const BigInteger& bi);
     BigInteger& operator-=(const BigInteger& bi);
     BigInteger& operator*=(const BigInteger& bi);
+    BigInteger& operator/=(const BigInteger& bi);
     BigInteger& operator--(); // pre
     BigInteger operator--(int); // post
     BigInteger& operator++(); // pre

@@ -7,10 +7,10 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
     // Samples
-    BigInteger bin("1011", 2); // 11
-    BigInteger oct("13", 8); // 11
-    BigInteger dec("255", 10); // 255
-    BigInteger hex("ff", 16); // 255
+    BigInteger bin("1011", 2);  // 11
+    BigInteger oct("13", 8);    // 11
+    BigInteger dec("255", 10);  // 255
+    BigInteger hex("ff", 16);   // 255
 
     cout << bin << endl;
     cout << oct << endl;
@@ -22,6 +22,8 @@ int main(int argc, char const *argv[])
     assert(dec.substract(hex) == BigInteger::ZERO);
     assert(bin.multiply(hex) == BigInteger("2805"));
     assert(dec.pow(BigInteger::TEN) == BigInteger("1162523670191533212890625"));
+    assert(hex.divide(oct) == BigInteger("23"));
+    assert(hex.modulus(oct) == BigInteger("2"));
 
     return 0;
 }

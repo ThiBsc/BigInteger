@@ -1,8 +1,8 @@
 #include "header/biginteger.h"
 
-BigInteger BigInteger::ZERO = BigInteger("0", 10);
-BigInteger BigInteger::ONE = BigInteger("1", 10);
-BigInteger BigInteger::TEN = BigInteger("10", 10);
+BigInteger BigInteger::ZERO = BigInteger("0");
+BigInteger BigInteger::ONE = BigInteger("1");
+BigInteger BigInteger::TEN = BigInteger("10");
 
 BigInteger::BigInteger()
     : m_radix(10)
@@ -29,13 +29,13 @@ BigInteger::BigInteger(std::string value, int radix)
     } else {
         // convert to base 10 to use trivial algorithm
         char clast = value.back();
-        int last = ( (0<=(clast-'0')) && ((clast-'0')<=9) ? (clast-'0') : (tolower(clast)-'a')+10 );
+        int last = ( ('0'<=clast) && (clast<='9') ? (clast-'0') : (tolower(clast)-'a')+10 );
         int valLength = value.length();
         BigInteger pow = BigInteger(std::to_string(valLength-1));
         BigInteger converted_value(std::to_string(last)), bi_radix(std::to_string(radix));
         for (int i=0; i<valLength-1; i++){
             char c = value.at(i);
-            int cur_val = ( (0<=(c-'0')) && ((c-'0')<=9) ? (c-'0') : (tolower(c)-'a')+10 );
+            int cur_val = ( ('0'<=c) && (c<='9') ? (c-'0') : (tolower(c)-'a')+10 );
             converted_value += BigInteger(std::to_string(cur_val)).multiply(bi_radix.pow(pow--));
         }
         (*this) = (m_signed ? converted_value.negate() : converted_value);
@@ -146,7 +146,6 @@ BigInteger BigInteger::substract(const BigInteger& bi) const
 BigInteger BigInteger::multiply(const BigInteger& bi) const
 {
     BigInteger multiplication;
-
     std::string mul = this->m_value;
     std::string multiplied = bi.m_value;
     std::reverse(mul.begin(), mul.end());
@@ -178,13 +177,42 @@ BigInteger BigInteger::multiply(const BigInteger& bi) const
     if (!positive){
         multiplication = multiplication.negate();
     }
-
     return multiplication;
 }
 
 BigInteger BigInteger::divide(const BigInteger& bi) const
 {
-    return BigInteger("0");
+    BigInteger division;
+    if (ZERO == bi){
+        // division by zero
+    } else {
+        std::string dividend = this->m_value;
+        std::string quotient, cur_quotient;
+        std::reverse(dividend.begin(), dividend.end());
+        BigInteger bi_abs = bi.absolute();
+        do {
+            cur_quotient.push_back(dividend.back());
+            dividend.pop_back();
+            BigInteger bi_dividend(cur_quotient);
+            if (bi_dividend > bi_abs){
+                BigInteger n = BigInteger("2");
+                while (bi_abs.multiply(n) < bi_dividend){
+                    n++;
+                }
+                n--;
+                quotient.append(n.toString());
+                cur_quotient = bi_dividend.substract(bi_abs.multiply(n)).toString();
+            } else {
+                quotient.push_back('0');
+            }
+        } while (!dividend.empty());
+        division = BigInteger(quotient);
+        bool positive = (this->m_signed && bi.m_signed) || (!this->m_signed && !bi.m_signed);
+        if (!positive){
+            division = division.negate();
+        }
+    }
+    return division;
 }
 
 BigInteger BigInteger::pow(const BigInteger& bi) const
@@ -206,7 +234,8 @@ BigInteger BigInteger::pow(const BigInteger& bi) const
 
 BigInteger BigInteger::modulus(const BigInteger& bi) const
 {
-    return BigInteger("0");
+    BigInteger mod = substract(bi.multiply(divide(bi)));
+    return mod;
 }
 
 int BigInteger::compare(const BigInteger& bi) const
@@ -244,6 +273,21 @@ BigInteger BigInteger::negate() const
     return BigInteger((this->m_signed ? value : value.insert(0, 1, '-')));
 }
 
+BigInteger BigInteger::absolute() const
+{
+    return (isPositive() ? (*this) : negate());
+}
+
+bool BigInteger::isNegative() const
+{
+    return this->m_signed;
+}
+
+bool BigInteger::isPositive() const
+{
+    return !this->m_signed;
+}
+
 void BigInteger::swap(BigInteger &bi)
 {
 	BigInteger tmp = (*this);
@@ -266,6 +310,16 @@ BigInteger BigInteger::operator*(const BigInteger& bi)
     return this->multiply(bi);
 }
 
+BigInteger BigInteger::operator/(const BigInteger& bi)
+{
+    return this->divide(bi);
+}
+
+BigInteger BigInteger::operator%(const BigInteger& bi)
+{
+    return this->modulus(bi);
+}
+
 BigInteger& BigInteger::operator+=(const BigInteger& bi)
 {
     (*this) = add(bi);
@@ -281,6 +335,12 @@ BigInteger& BigInteger::operator-=(const BigInteger& bi)
 BigInteger& BigInteger::operator*=(const BigInteger& bi)
 {
     (*this) = multiply(bi);
+    return (*this);
+}
+
+BigInteger& BigInteger::operator/=(const BigInteger& bi)
+{
+    (*this) = divide(bi);
     return (*this);
 }
 
