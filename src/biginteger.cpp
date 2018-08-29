@@ -185,6 +185,8 @@ BigInteger BigInteger::divide(const BigInteger& bi) const
     BigInteger division;
     if (ZERO == bi){
         // division by zero
+    } else if (ONE == bi) {
+        division = (*this);
     } else {
         std::string dividend = this->m_value;
         std::string quotient, cur_quotient;
@@ -196,7 +198,7 @@ BigInteger BigInteger::divide(const BigInteger& bi) const
             BigInteger bi_dividend(cur_quotient);
             if (bi_dividend > bi_abs){
                 BigInteger n = BigInteger("2");
-                while (bi_abs.multiply(n) < bi_dividend){
+                while (bi_abs.multiply(n) <= bi_dividend){
                     n++;
                 }
                 n--;
@@ -206,11 +208,11 @@ BigInteger BigInteger::divide(const BigInteger& bi) const
                 quotient.push_back('0');
             }
         } while (!dividend.empty());
-        division = BigInteger(quotient);
-        bool positive = (this->m_signed && bi.m_signed) || (!this->m_signed && !bi.m_signed);
-        if (!positive){
-            division = division.negate();
-        }
+        division = BigInteger(quotient);        
+    }
+    bool positive = (this->m_signed && bi.m_signed) || (!this->m_signed && !bi.m_signed);
+    if (!positive){
+        division = division.negate();
     }
     return division;
 }
@@ -391,13 +393,13 @@ bool BigInteger::operator>(const BigInteger& bi)
 bool BigInteger::operator<=(const BigInteger& bi)
 {
     int cmp = compare(bi);
-    return (cmp == -1) || (cmp && 0);
+    return (cmp == -1) || (cmp == 0);
 }
 
 bool BigInteger::operator>=(const BigInteger& bi)
 {
     int cmp = compare(bi);
-    return (cmp == 0) || (cmp && 1);
+    return (cmp == 0) || (cmp == 1);
 }
 
 std::string BigInteger::toString() const
