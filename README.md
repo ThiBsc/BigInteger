@@ -2,15 +2,6 @@
 [![Build Status](https://travis-ci.org/thibDev/BigInteger.svg?branch=master)](https://travis-ci.org/thibDev/BigInteger) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)  
 BigInteger C++ implementation.
 
-- [BigInteger](#biginteger)
-    - [Features](#features)
-        - [Radix](#radix)
-        - [Arithmetic](#arithmetic)
-        - [Modification & Checking/Operator](#modification--checkingoperator)
-    - [Code sample](#code-sample)
-    - [Compile & Test](#compile--test)
-    - [Support development :+1:](#support-development-1)
-
 ## Features
 ### Radix
 
@@ -25,35 +16,49 @@ BigInteger hex("ff", 16);   // 255
 
 ### Arithmetic
 
-- [x] add
-- [x] substract
-- [x] multiply
-- [x] divide
-- [x] pow
-- [x] modulus
+```cpp
+BigInteger a(127), b(273), c(-597);
+a.add(b);               // 400
+a.add(c);               // -470
+a.substract(b);         // -146
+a.substract(c);         // 724
+a.multiply(b);          // 34671
+a.multiply(c);          // -75819
+b.divide(c);            // 2
+c.divide(a);            // -4
+a.pow(BigInteger(12));  // 17605349516220764271966721
+b.modulus(a);           // 19
+```
 
 ### Modification & Checking/Operator
 
-- [x] compare
-- [x] negate
-- [x] swap
-- [x] operator--, operator++ (post, pre)
-- [x] operator+, operator-, operator*, operator/, operator%
-- [x] operator+=, operator-=, operator*=, operator/=
-- [x] operator<, operator>, operator<=, operator>=
-- [x] operator<<
+```cpp
+BigInteger a(127), b(127), c(-597);
+c.compare(a);   // -1
+a.compare(b);   // 0
+a.compare(c);   // 1
+a.negate();     // -127
+c.absolute();   // 597
+a.swap(c);      // a=-597, c=127
+```
+#### Operator
+
+- operator--, operator++ (prefix, postfix)
+- operator+, operator-, operator*, operator/, operator%
+- operator+=, operator-=, operator*=, operator/=
+- operator==, operator!=, operator<, operator>, operator<=, operator>=
+- operator<<
 
 ## Code sample
 
 ```cpp
-// Use with cout to print result
-bin.add(oct);                    // 22
-dec.substract(hex);              // 0
-bin.multiply(hex);               // 2805
-dec.pow(BigInteger::TEN);        // 1 162 523 670 191 533 212 890 625
-hex.divide(oct);                 // 23
-hex.modulus(oct);                // 2
-BigInteger("2").substract("-3"); // (2)-(-3) = 2+3 = 5
+// Will print 1 27 25 12 6 20 22 2 6 19 25 25 24 14 12
+BigInteger payload("9444732987799592368290"), modulo = 31;
+while (!(payload == BigInteger::ZERO)) {
+    BigInteger mod = payload.modulus(modulo);
+    payload = payload.divide(modulo);
+    cout << mod << " ";
+}
 ```
 
 ## Compile & Test

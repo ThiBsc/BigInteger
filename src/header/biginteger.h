@@ -16,6 +16,8 @@ class BigInteger
 {
 public:
     BigInteger();
+    BigInteger(int value);
+    BigInteger(long long value);
     BigInteger(std::string value, int radix = 10);
     ~BigInteger();
 
@@ -64,6 +66,7 @@ public:
     BigInteger& operator++(); // pre
     BigInteger operator++(int); // post
     bool operator==(const BigInteger& bi);
+    bool operator!=(const BigInteger& bi);
     bool operator<(const BigInteger& bi);
     bool operator>(const BigInteger& bi);
     bool operator<=(const BigInteger& bi);
@@ -73,7 +76,7 @@ public:
         return stream;
     }    
 
-    std::string toString() const;
+    std::string toString(int radix = 10) const;
 
 private:
     int m_radix;

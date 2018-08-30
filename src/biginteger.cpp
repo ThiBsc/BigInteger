@@ -12,6 +12,28 @@ BigInteger::BigInteger()
     
 }
 
+BigInteger::BigInteger(int value)
+    : m_radix(10)
+    , m_signed(value < 0)
+{
+    std::string str_value = std::to_string(value);
+    if (m_signed){
+        str_value.erase(0, 1);
+    }
+    m_value = str_value;
+}
+
+BigInteger::BigInteger(long long value)
+    : m_radix(10)
+    , m_signed(value < 0)
+{
+    std::string str_value = std::to_string(value);
+    if (m_signed){
+        str_value.erase(0, 1);
+    }
+    m_value = str_value;
+}
+
 BigInteger::BigInteger(std::string value, int radix)
     : m_radix(radix)
     , m_signed(false)
@@ -31,12 +53,12 @@ BigInteger::BigInteger(std::string value, int radix)
         char clast = value.back();
         int last = ( ('0'<=clast) && (clast<='9') ? (clast-'0') : (tolower(clast)-'a')+10 );
         int valLength = value.length();
-        BigInteger pow = BigInteger(std::to_string(valLength-1));
-        BigInteger converted_value(std::to_string(last)), bi_radix(std::to_string(radix));
+        BigInteger pow(valLength-1);
+        BigInteger converted_value(last), bi_radix(radix);
         for (int i=0; i<valLength-1; i++){
             char c = value.at(i);
             int cur_val = ( ('0'<=c) && (c<='9') ? (c-'0') : (tolower(c)-'a')+10 );
-            converted_value += BigInteger(std::to_string(cur_val)).multiply(bi_radix.pow(pow--));
+            converted_value += BigInteger(cur_val).multiply(bi_radix.pow(pow--));
         }
         (*this) = (m_signed ? converted_value.negate() : converted_value);
     }
@@ -187,6 +209,8 @@ BigInteger BigInteger::divide(const BigInteger& bi) const
         // division by zero
     } else if (ONE == bi) {
         division = (*this);
+    } else if (compare(bi) == 0) {
+        division = 1;
     } else {
         std::string dividend = this->m_value;
         std::string quotient, cur_quotient;
@@ -197,7 +221,7 @@ BigInteger BigInteger::divide(const BigInteger& bi) const
             dividend.pop_back();
             BigInteger bi_dividend(cur_quotient);
             if (bi_dividend > bi_abs){
-                BigInteger n = BigInteger("2");
+                BigInteger n = BigInteger(2);
                 while (bi_abs.multiply(n) <= bi_dividend){
                     n++;
                 }
@@ -280,14 +304,14 @@ BigInteger BigInteger::absolute() const
     return (isPositive() ? (*this) : negate());
 }
 
-bool BigInteger::isNegative() const
-{
-    return this->m_signed;
-}
-
 bool BigInteger::isPositive() const
 {
     return !this->m_signed;
+}
+
+bool BigInteger::isNegative() const
+{
+    return this->m_signed;
 }
 
 void BigInteger::swap(BigInteger &bi)
@@ -378,6 +402,12 @@ bool BigInteger::operator==(const BigInteger& bi)
     return equal;
 }
 
+bool BigInteger::operator!=(const BigInteger& bi)
+{
+    bool different = (compare(bi) != 0);
+    return different;
+}
+
 bool BigInteger::operator<(const BigInteger& bi)
 {
     bool less = (compare(bi) == -1);
@@ -402,12 +432,25 @@ bool BigInteger::operator>=(const BigInteger& bi)
     return (cmp == 0) || (cmp == 1);
 }
 
-std::string BigInteger::toString() const
+std::string BigInteger::toString(int radix) const
 {
     std::stringstream ss;
     if (m_signed){
         ss << '-';
     }
-    ss << m_value;
+    if (radix == 10){
+        ss << m_value;
+    } else {
+        BigInteger dec_val = (*this), modulo(radix);
+        std::string str;
+        while (ZERO != dec_val){
+            BigInteger remain = dec_val.modulus(modulo);
+            dec_val /= modulo;
+            char c = (ZERO<=remain && remain<TEN ? std::stoi(remain.toString())+'0' : std::stoi(remain.substract(TEN).toString())+'a');
+            str.push_back(c);
+        }
+        std::reverse(str.begin(), str.end());
+        ss << str;
+    }
     return ss.str();
 }

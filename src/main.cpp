@@ -11,11 +11,19 @@ int main(int argc, char const *argv[])
     BigInteger oct("13", 8);    // 11
     BigInteger dec("255", 10);  // 255
     BigInteger hex("ff", 16);   // 255
+    BigInteger num(456);
 
-    cout << bin << endl;
-    cout << oct << endl;
-    cout << dec << endl;
-    cout << hex << endl;
+    cout << "1011 bin -> " << bin << endl;
+    cout << "13 oct -> " << oct << endl;
+    cout << "255 dec -> " << dec << endl;
+    cout << "ff hex -> " << hex << endl;
+
+    cout << 456 << " in [bin, ter, oct, dec, hex]" << endl;
+    cout << num.toString(2) << endl;
+    cout << num.toString(3) << endl;
+    cout << num.toString(8) << endl;
+    cout << num.toString() << endl;
+    cout << num.toString(16) << endl;
     
     // Check
     assert(bin.add(oct) == BigInteger("22"));
@@ -24,6 +32,7 @@ int main(int argc, char const *argv[])
     assert(dec.pow(BigInteger::TEN) == BigInteger("1162523670191533212890625"));
     assert(hex.divide(oct) == BigInteger("23"));
     assert(hex.modulus(oct) == BigInteger("2"));
+    assert(BigInteger(1024).toString(8) == "2000");
 
     return 0;
 }
