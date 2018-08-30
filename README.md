@@ -52,12 +52,27 @@ a.swap(c);      // a=-597, c=127
 ## Code sample
 
 ```cpp
-// Will print 1 27 25 12 6 20 22 2 6 19 25 25 24 14 12
-BigInteger payload("9444732987799592368290"), modulo = 31;
-while (!(payload == BigInteger::ZERO)) {
-    BigInteger mod = payload.modulus(modulo);
-    payload = payload.divide(modulo);
-    cout << mod << " ";
+#include <iostream>
+#include <cassert>
+#include "header/biginteger.h"
+
+using namespace std;
+
+int main(int argc, char const *argv[])
+{
+    BigInteger hex("aef8", 16), power(12);
+    cout << hex << " ^ " << power << " = " << hex.pow(power) << endl;
+
+    BigInteger payload("9444732987799592368290"), modulo = 31;
+    while (!(payload == BigInteger::ZERO)) {
+        BigInteger mod = payload.modulus(modulo);
+        payload = payload.divide(modulo);
+        cout << mod << " ";
+    }
+    cout << endl;
+    assert(hex.pow(power) == BigInteger("65223703316636040602169485327930322370641440178266177536"));
+
+    return 0;
 }
 ```
 
