@@ -264,6 +264,11 @@ BigInteger BigInteger::modulus(const BigInteger& bi) const
     return mod;
 }
 
+int BigInteger::bitLength() const
+{
+    return toString(2).length();
+}
+
 int BigInteger::compare(const BigInteger& bi) const
 {
     int comparison;

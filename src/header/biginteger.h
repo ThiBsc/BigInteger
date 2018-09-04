@@ -42,6 +42,7 @@ public:
     /**
      * Modification & Checking
      */
+    int bitLength() const;
     int compare(const BigInteger& bi) const;
     BigInteger negate() const;
     BigInteger absolute() const;
