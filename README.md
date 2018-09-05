@@ -34,12 +34,13 @@ b.modulus(a);           // 19
 
 ```cpp
 BigInteger a(127), b(127), c(-597);
-c.compare(a);   // -1
-a.compare(b);   // 0
-a.compare(c);   // 1
-a.negate();     // -127
-c.absolute();   // 597
-a.swap(c);      // a=-597, c=127
+c.compare(a);           // -1
+a.compare(b);           // 0
+a.compare(c);           // 1
+a.negate();             // -127
+c.absolute();           // 597
+a.swap(c);              // a=-597, c=127
+(BigInteger::ONE << 8); // 256
 ```
 #### Operator
 

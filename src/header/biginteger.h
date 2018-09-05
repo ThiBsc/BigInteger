@@ -21,9 +21,9 @@ public:
     BigInteger(std::string value, int radix = 10);
     ~BigInteger();
 
-    static BigInteger ZERO;
-    static BigInteger ONE;
-    static BigInteger TEN;    
+    static const BigInteger ZERO;
+    static const BigInteger ONE;
+    static const BigInteger TEN;
 
     /**
      * Elementary arithmetic
@@ -58,6 +58,8 @@ public:
     BigInteger operator*(const BigInteger& bi);
     BigInteger operator/(const BigInteger& bi);
     BigInteger operator%(const BigInteger& bi);
+    BigInteger operator<<(const BigInteger& bi) const;
+    BigInteger operator>>(const BigInteger& bi) const;
     BigInteger& operator+=(const BigInteger& bi);
     BigInteger& operator-=(const BigInteger& bi);
     BigInteger& operator*=(const BigInteger& bi);
@@ -66,12 +68,12 @@ public:
     BigInteger operator--(int); // post
     BigInteger& operator++(); // pre
     BigInteger operator++(int); // post
-    bool operator==(const BigInteger& bi);
-    bool operator!=(const BigInteger& bi);
-    bool operator<(const BigInteger& bi);
-    bool operator>(const BigInteger& bi);
-    bool operator<=(const BigInteger& bi);
-    bool operator>=(const BigInteger& bi);
+    bool operator==(const BigInteger& bi) const;
+    bool operator!=(const BigInteger& bi) const;
+    bool operator<(const BigInteger& bi) const;
+    bool operator>(const BigInteger& bi) const;
+    bool operator<=(const BigInteger& bi) const;
+    bool operator>=(const BigInteger& bi) const;
     friend std::ostream& operator<<(std::ostream& stream, const BigInteger& bi){
         stream << bi.toString();
         return stream;

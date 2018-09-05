@@ -1,8 +1,8 @@
 #include "header/biginteger.h"
 
-BigInteger BigInteger::ZERO = BigInteger("0");
-BigInteger BigInteger::ONE = BigInteger("1");
-BigInteger BigInteger::TEN = BigInteger("10");
+const BigInteger BigInteger::ZERO = BigInteger("0");
+const BigInteger BigInteger::ONE = BigInteger("1");
+const BigInteger BigInteger::TEN = BigInteger("10");
 
 BigInteger::BigInteger()
     : m_radix(10)
@@ -205,9 +205,9 @@ BigInteger BigInteger::multiply(const BigInteger& bi) const
 BigInteger BigInteger::divide(const BigInteger& bi) const
 {
     BigInteger division;
-    if (ZERO == bi){
+    if (bi == ZERO){
         // division by zero
-    } else if (ONE == bi) {
+    } else if (bi == ONE) {
         division = (*this);
     } else if (compare(bi) == 0) {
         division = 1;
@@ -244,9 +244,9 @@ BigInteger BigInteger::divide(const BigInteger& bi) const
 BigInteger BigInteger::pow(const BigInteger& bi) const
 {
     BigInteger ret;
-    if (ZERO == bi){
+    if (bi == ZERO){
         ret = ONE;
-    } else if (ONE == bi){
+    } else if (bi == ONE){
         ret = (*this);
     } else {
         BigInteger initial_value = (*this);
@@ -351,6 +351,27 @@ BigInteger BigInteger::operator%(const BigInteger& bi)
     return this->modulus(bi);
 }
 
+BigInteger BigInteger::operator<<(const BigInteger& bi) const
+{
+    std::string bitwise_val = toString(2);
+    for (BigInteger i = ZERO; i<bi; i++){
+        bitwise_val.push_back('0');
+    }
+    return BigInteger(bitwise_val, 2);
+}
+
+BigInteger BigInteger::operator>>(const BigInteger& bi) const
+{
+    std::string bitwise_val = toString(2);
+    for (BigInteger i = ZERO; i<bi && bitwise_val.length()>0; i++){
+        bitwise_val.pop_back();
+    }
+    if (bitwise_val.empty()){
+        bitwise_val.push_back('0');
+    }
+    return BigInteger(bitwise_val, 2);
+}
+
 BigInteger& BigInteger::operator+=(const BigInteger& bi)
 {
     (*this) = add(bi);
@@ -401,37 +422,37 @@ BigInteger BigInteger::operator++(int)
     return before_plus;
 }
 
-bool BigInteger::operator==(const BigInteger& bi)
+bool BigInteger::operator==(const BigInteger& bi) const
 {
     bool equal = (compare(bi) == 0);
     return equal;
 }
 
-bool BigInteger::operator!=(const BigInteger& bi)
+bool BigInteger::operator!=(const BigInteger& bi) const
 {
     bool different = (compare(bi) != 0);
     return different;
 }
 
-bool BigInteger::operator<(const BigInteger& bi)
+bool BigInteger::operator<(const BigInteger& bi) const
 {
     bool less = (compare(bi) == -1);
     return less;
 }
 
-bool BigInteger::operator>(const BigInteger& bi)
+bool BigInteger::operator>(const BigInteger& bi) const
 {
     bool more = (compare(bi) == 1);
     return more;
 }
 
-bool BigInteger::operator<=(const BigInteger& bi)
+bool BigInteger::operator<=(const BigInteger& bi) const
 {
     int cmp = compare(bi);
     return (cmp == -1) || (cmp == 0);
 }
 
-bool BigInteger::operator>=(const BigInteger& bi)
+bool BigInteger::operator>=(const BigInteger& bi) const
 {
     int cmp = compare(bi);
     return (cmp == 0) || (cmp == 1);
@@ -448,7 +469,7 @@ std::string BigInteger::toString(int radix) const
     } else {
         BigInteger dec_val = (*this), modulo(radix);
         std::string str;
-        while (ZERO != dec_val){
+        while (dec_val != ZERO){
             BigInteger remain = dec_val.modulus(modulo);
             dec_val /= modulo;
             char c = (ZERO<=remain && remain<TEN ? std::stoi(remain.toString())+'0' : std::stoi(remain.substract(TEN).toString())+'a');
