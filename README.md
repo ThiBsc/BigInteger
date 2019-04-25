@@ -1,5 +1,5 @@
 # BigInteger
-[![Build Status](https://travis-ci.org/thibDev/BigInteger.svg?branch=master)](https://travis-ci.org/thibDev/BigInteger) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)  
+[![Build Status](https://travis-ci.org/ThiBsc/BigInteger.svg?branch=master)](https://travis-ci.org/ThiBsc/BigInteger) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)  
 BigInteger C++ implementation.
 
 ## Features
