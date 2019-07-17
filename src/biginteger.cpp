@@ -220,7 +220,7 @@ BigInteger BigInteger::divide(const BigInteger& bi) const
             cur_quotient.push_back(dividend.back());
             dividend.pop_back();
             BigInteger bi_dividend(cur_quotient);
-            if (bi_dividend > bi_abs){
+            if (bi_dividend >= bi_abs){
                 BigInteger n = BigInteger(2);
                 while (bi_abs.multiply(n) <= bi_dividend){
                     n++;
