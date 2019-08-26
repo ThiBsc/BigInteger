@@ -36,10 +36,9 @@ BigInteger::BigInteger(long long value)
 
 BigInteger::BigInteger(std::string value, int radix)
     : m_radix(radix)
-    , m_signed(false)
+    , m_signed(value.front() == '-')
 {
-    if (value.front() == '-'){
-        m_signed = true;
+    if (m_signed){
         value.erase(0, 1);
     }
     // remove leading 0
