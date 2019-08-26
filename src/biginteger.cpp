@@ -1,8 +1,8 @@
 #include "header/biginteger.h"
 
-const BigInteger BigInteger::ZERO = BigInteger("0");
-const BigInteger BigInteger::ONE = BigInteger("1");
-const BigInteger BigInteger::TEN = BigInteger("10");
+const BigInteger BigInteger::ZERO = BigInteger(0);
+const BigInteger BigInteger::ONE = BigInteger(1);
+const BigInteger BigInteger::TEN = BigInteger(10);
 
 BigInteger::BigInteger()
     : m_radix(10)
@@ -126,17 +126,10 @@ BigInteger BigInteger::substract(const BigInteger& bi) const
         if (this->m_signed){
             substraction = add(bi.negate());
         } else {
-            std::string sub;
-            std::string removed;
-            bool invert_sign = false;
-            if (compare(bi) == -1){
-                sub = bi.m_value;
-                removed = this->m_value;
-                invert_sign = true;
-            } else {
-                sub = this->m_value;
-                removed = bi.m_value;
-            }
+            bool invert_sign = (compare(bi) == -1);
+            std::string sub = (invert_sign ? bi.m_value : this->m_value);
+            std::string removed = (invert_sign ? this->m_value : bi.m_value);
+            
             int diffLength = std::abs(int(sub.length() - removed.length()));
             if (sub.size() > removed.size()){
                 removed.insert(0, diffLength, '0');
