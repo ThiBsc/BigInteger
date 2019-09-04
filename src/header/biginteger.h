@@ -24,6 +24,7 @@ public:
     static const BigInteger ZERO;
     static const BigInteger ONE;
     static const BigInteger TEN;
+    static const std::string baseChar;
 
     /**
      * Elementary arithmetic

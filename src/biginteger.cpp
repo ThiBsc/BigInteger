@@ -1,8 +1,10 @@
 #include "header/biginteger.h"
 
-const BigInteger BigInteger::ZERO = BigInteger(0);
-const BigInteger BigInteger::ONE = BigInteger(1);
-const BigInteger BigInteger::TEN = BigInteger(10);
+const BigInteger BigInteger::ZERO = BigInteger("0");
+const BigInteger BigInteger::ONE = BigInteger("1");
+const BigInteger BigInteger::TEN = BigInteger("10");
+// Base 32 max
+const std::string BigInteger::baseChar = "0123456789abcdefghijklmnopqrstuv";
 
 BigInteger::BigInteger()
     : m_radix(10)
@@ -464,7 +466,7 @@ std::string BigInteger::toString(int radix) const
         while (dec_val != ZERO){
             BigInteger remain = dec_val.modulus(modulo);
             dec_val /= modulo;
-            char c = (ZERO<=remain && remain<TEN ? std::stoi(remain.toString())+'0' : std::stoi(remain.substract(TEN).toString())+'a');
+            char c = baseChar.at(std::stoi(remain.toString()));
             str.push_back(c);
         }
         std::reverse(str.begin(), str.end());
