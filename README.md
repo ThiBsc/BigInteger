@@ -5,13 +5,14 @@ BigInteger C++ implementation.
 ## Features
 ### Radix
 
-From 2 to 16
+From 2 to 32
 ```cpp
 BigInteger bin("1011", 2);  // 11
 BigInteger ter("121", 3);   // 16
 BigInteger oct("13", 8);    // 11
 BigInteger dec("255", 10);  // 255
 BigInteger hex("ff", 16);   // 255
+BigInteger hex("7v", 32);   // 255
 ```
 
 ### Arithmetic

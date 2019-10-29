@@ -11,12 +11,14 @@ int main(int argc, char const *argv[])
     BigInteger oct("13", 8);    // 11
     BigInteger dec("255", 10);  // 255
     BigInteger hex("ff", 16);   // 255
+    BigInteger b32("7v", 32);   // 255
     BigInteger num("123456789");
 
     cout << "1011 bin -> " << bin << endl;
     cout << "13 oct -> " << oct << endl;
     cout << "255 dec -> " << dec << endl;
     cout << "ff hex -> " << hex << endl;
+    cout << "7v b32 -> " << b32 << endl;
 
     cout << "123456789" << " in [bin, ter, oct, dec, hex, b32]" << endl;
     cout << num.toString(2) << endl;
