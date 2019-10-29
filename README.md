@@ -12,7 +12,7 @@ BigInteger ter("121", 3);   // 16
 BigInteger oct("13", 8);    // 11
 BigInteger dec("255", 10);  // 255
 BigInteger hex("ff", 16);   // 255
-BigInteger hex("7v", 32);   // 255
+BigInteger b32("7v", 32);   // 255
 ```
 
 ### Arithmetic
