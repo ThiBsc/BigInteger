@@ -1,68 +1,92 @@
 #include "header/biginteger.h"
+#include <iostream>
 
-const BigInteger BigInteger::ZERO = BigInteger("0");
-const BigInteger BigInteger::ONE = BigInteger("1");
-const BigInteger BigInteger::TEN = BigInteger("10");
-// Base 32 max
-const std::string BigInteger::baseChar = "0123456789abcdefghijklmnopqrstuv";
+uint32_t hi(uint32_t x)
+{
+	return x >> 16;
+}
+
+uint32_t lo(uint32_t x)
+{
+	return ((1 << 16) - 1) & x;
+}
+
+uint32_t multiply(uint32_t a, uint32_t b, uint32_t *carry)
+{
+    // https://stackoverflow.com/questions/1815367/catch-and-compute-overflow-during-multiplication-of-two-large-integers
+    // test http://coliru.stacked-crooked.com/a/2af4af1f9dff611d
+	// actually uint16_t would do, but the casting is annoying
+    uint32_t s0, s1, s2, s3; 
+
+    uint32_t x = lo(a) * lo(b);
+    s0 = lo(x);
+
+    x = hi(a) * lo(b) + hi(x);
+    s1 = lo(x);
+    s2 = hi(x);
+
+    x = s1 + lo(a) * hi(b);
+    s1 = lo(x);
+
+    x = s2 + hi(a) * hi(b) + hi(x);
+    s2 = lo(x);
+    s3 = hi(x);
+
+    uint32_t result = (s1 << 16 | s0);
+    if (carry){
+        (*carry) = (s3 << 16 | s2);
+    }
+	
+    return result;
+}
 
 BigInteger::BigInteger()
-    : m_radix(10)
-    , m_signed(false)
-    , m_value("0")
+	: value(0)
+	, isSigned(false)
 {
     
 }
 
-BigInteger::BigInteger(int value)
-    : m_radix(10)
-    , m_signed(value < 0)
+BigInteger::BigInteger(int32_t value)
+    : value(std::abs(value))
+	, isSigned(value < 0)
 {
-    std::string str_value = std::to_string(value);
-    if (m_signed){
-        str_value.erase(0, 1);
-    }
-    m_value = str_value;
+	if ( this->value > MAX_B10P9){
+		this->value -= B10P9;
+
+		if (this->b10.empty()){
+			this->b10.emplace_back(1);
+		} else {
+			this->b10.back() += 1;
+		}
+	}
 }
 
-BigInteger::BigInteger(long long value)
-    : m_radix(10)
-    , m_signed(value < 0)
+BigInteger::BigInteger(std::string strvalue)
+    : value(0)
+	, isSigned(strvalue.front() == '-')
 {
-    std::string str_value = std::to_string(value);
-    if (m_signed){
-        str_value.erase(0, 1);
-    }
-    m_value = str_value;
-}
+	if (isSigned){
+		strvalue.erase(strvalue.begin());
+	}
 
-BigInteger::BigInteger(std::string value, int radix)
-    : m_radix(radix)
-    , m_signed(value.front() == '-')
-{
-    if (m_signed){
-        value.erase(0, 1);
-    }
-    // remove leading 0
-    while (value.front()=='0' && value.length()!=1){
-        value.erase(0, 1);
-    }
-    if (radix == 10){
-        m_value = value;
-    } else {
-        // convert to base 10 to use trivial algorithm
-        char clast = value.back();
-        int last = ( ('0'<=clast) && (clast<='9') ? (clast-'0') : (tolower(clast)-'a')+10 );
-        int valLength = value.length();
-        BigInteger pow(valLength-1);
-        BigInteger converted_value(last), bi_radix(radix);
-        for (int i=0; i<valLength-1; i++){
-            char c = value.at(i);
-            int cur_val = ( ('0'<=c) && (c<='9') ? (c-'0') : (tolower(c)-'a')+10 );
-            converted_value += BigInteger(cur_val).multiply(bi_radix.pow(pow--));
-        }
-        (*this) = (m_signed ? converted_value.negate() : converted_value);
-    }
+	// Offset: How many ^9 we have
+	int offset = 0;
+	while (!strvalue.empty()){
+		// (10^9)-1 = "999999999" -> len = 9
+		int pos = strvalue.size() - 9;
+		pos = (pos < 0 ? 0 : pos);
+		std::string val = strvalue.substr(pos);
+		strvalue.erase(pos);
+
+		unsigned long ul = std::stoul(val);
+		if (offset == 0){
+			this->value = ul;
+		} else {
+			b10.emplace_back(ul);
+		}
+		offset++;
+	}
 }
 
 BigInteger::~BigInteger()
@@ -72,405 +96,139 @@ BigInteger::~BigInteger()
 
 BigInteger BigInteger::add(const BigInteger& bi) const
 {
-    BigInteger addition;
-    if (this->m_signed && !bi.m_signed){
-        // (-a)+(+b)
-        addition = bi.substract(negate());
-    } else if (!this->m_signed && bi.m_signed){
-        // (+a)+(-b)
-        addition = substract(bi.negate());
-    } else {
-        // (+a)+(+b) or (-a)+(-b)
-        std::string sum = this->m_value;
-        std::string added = bi.m_value;
-        int diffLength = std::abs(int(sum.length() - added.length()));
-        if (sum.length() > added.length()){
-            added.insert(0, diffLength, '0');
-        } else {
-            sum.insert(0, diffLength, '0');
-        }
-        std::reverse(sum.begin(), sum.end());
-        std::reverse(added.begin(), added.end());
-        char carry = '0';
+	BigInteger add;
 
-        int index = 0;
-        for (char& c : sum){
-            c = (carry-'0') + (c-'0') + (added.at(index)-'0') + '0';
-            if (c > '9'){
-                c -= 10;
-                carry = '1';
-            } else {
-                carry = '0';
-            }
-            index++;
-        }
-        if (carry > '0'){
-            sum.append(1, carry);
-        }
-        std::reverse(sum.begin(), sum.end());
-        addition = (this->m_signed ? BigInteger(sum).negate() : BigInteger(sum));
-    }
-    return addition;
+	add.value = (value + bi.value);
+	add.b10 = b10;
+
+	if ( add.value > MAX_B10P9){
+		add.value -= B10P9;
+
+		if (add.b10.empty()){
+			add.b10.insert(add.b10.cbegin(), 1);
+		} else {
+			add.b10.front() += 1;
+		}
+	}
+
+	std::vector<uint32_t> sumUP = bi.b10;
+
+	auto it = add.b10.begin();
+	for (const uint32_t& sum : sumUP){
+		(*it) += sum;
+
+		if ( (*it) > MAX_B10P9){
+			(*it) -= B10P9;
+
+			if (it < add.b10.end()){
+				(*it) += 1;
+			} else {
+				add.b10.insert(add.b10.cbegin(), 1);
+			}
+		}
+		it++;
+	}
+
+	return add;
 }
 
-BigInteger BigInteger::substract(const BigInteger& bi) const
+BigInteger BigInteger::sub(const BigInteger& bi) const
 {
-    BigInteger substraction;
-    if (this->m_signed && !bi.m_signed){
-        // (-a)-(+b)
-        substraction = add(bi.negate());
-    } else if (!this->m_signed && bi.m_signed){
-        // (+a)-(-b)
-        substraction = add(bi.negate());
-    } else {
-        // (+a)-(+b) or (-a)-(-b)
-        if (this->m_signed){
-            substraction = add(bi.negate());
-        } else {
-            bool invert_sign = (compare(bi) == -1);
-            std::string sub = (invert_sign ? bi.m_value : this->m_value);
-            std::string removed = (invert_sign ? this->m_value : bi.m_value);
-            
-            int diffLength = std::abs(int(sub.length() - removed.length()));
-            if (sub.size() > removed.size()){
-                removed.insert(0, diffLength, '0');
-            } else {
-                sub.insert(0, diffLength, '0');
-            }
-            std::reverse(sub.begin(), sub.end());
-            std::reverse(removed.begin(), removed.end());
+	BigInteger sub;
 
-            int index = 0;
-            for (char& c : sub){
-                if (c < removed.at(index)){
-                    c += 10;
-                    sub[index+1]--;
-                }
-                c = (c-'0') - (removed.at(index)-'0') + '0';
-                index++;
-            }
-            std::reverse(sub.begin(), sub.end());
-            while (sub.front()=='0' && sub.length()!=1){
-                sub.erase(0, 1);
-            }
-            substraction = (invert_sign ? BigInteger(sub).negate() : BigInteger(sub));
-        }
-    }    
-    return substraction;
+	sub.value = value;
+	sub.b10 = b10;
+
+	std::vector<uint32_t> subDOWN = bi.b10;
+
+	// sub > bi, (easier to compute)
+	int offset = subDOWN.size()-1;
+
+	for (int o=offset; o>=0; o--){		
+		/**
+		 * When a > b
+		 * a - b = |b - a|
+		 */
+		if ( sub.b10[o] >= subDOWN[o] ){
+			sub.b10[o] -= subDOWN[o];
+		} else {
+			int take_carry = ((subDOWN[o] - sub.b10[o]) + 5) / 10;
+			sub.b10[o+1] -= take_carry;
+			sub.b10[o] = ((take_carry * 10) + sub.b10[o]) - subDOWN[o];
+		}
+	}
+	if ( sub.value >= bi.value ){
+		sub.value -= bi.value;
+	} else {
+		int take_carry = ((sub.value - bi.value) + 5) / 10;
+		sub.b10[0] -= take_carry;
+		sub.value = ((take_carry * 10) + sub.b10[0]) - bi.value;
+	}
+
+	sub.b10.erase(std::remove(sub.b10.begin(), sub.b10.end(), 0), sub.b10.end());
+
+	return sub;
 }
 
-BigInteger BigInteger::multiply(const BigInteger& bi) const
+BigInteger BigInteger::mul(const BigInteger& bi) const
 {
-    BigInteger multiplication;
-    std::string mul = this->m_value;
-    std::string multiplied = bi.m_value;
-    std::reverse(mul.begin(), mul.end());
-    std::reverse(multiplied.begin(), multiplied.end());
-    int step = 0;
-    char carry = '0';
-    for (const char& c1 : mul){
-        std::string cur_op;
-        cur_op.insert(0, step, '0');
-        for (const char& c2 : multiplied){
-            unsigned char val = ((c1-'0') * (c2-'0')) + (carry-'0') + '0';
-            carry = '0';
-            if (val > '9'){
-                while (val > '9'){
-                    val -= 10;
-                    carry++;
-                }
-            }
-            cur_op.insert(0, 1, val);
-        }
-        if (carry > '0'){
-            cur_op.insert(0, 1, carry);
-            carry = '0';
-        }
-        multiplication += BigInteger(cur_op);
-        step++;
-    }
-    bool positive = (this->m_signed && bi.m_signed) || (!this->m_signed && !bi.m_signed);
-    if (!positive){
-        multiplication = multiplication.negate();
-    }
-    return multiplication;
+	BigInteger mul;
+
+	uint iterA = b10.size()+1,  iterB = bi.b10.size()+1;
+	// <pow, val>
+	std::map<uint, uint> sum;
+
+	for (uint a=0; a<iterA; a++){
+		uint32_t va = (a == 0 ? value : b10[a-1]);
+		for (uint b=0; b<iterB; b++){
+			uint32_t vb = (b == 0 ? bi.value : bi.b10[b-1]);
+			uint32_t result, carry = 0;
+			result = multiply(va, vb, &carry);
+
+			uint32_t ocarry = carry;
+			
+			if (result > MAX_B10P9){
+				uint32_t result_carry = (result/B10P9);
+				result -= (result_carry*B10P9);
+				carry += result_carry;
+			}
+			
+			// to convert the result from 2^32 to 10^9
+			for (uint32_t i=0; i<ocarry; i++){
+				result += (UINT32_MAX - (uint32_t(4)*B10P9))+1;
+				carry += 3;
+				if (result > MAX_B10P9){
+					uint32_t result_carry = (result/B10P9);
+					result -= (result_carry*B10P9);
+					carry++;
+				}
+			}
+
+			sum[a+b] += result;
+			if ( sum[a+b] > MAX_B10P9){
+				sum[a+b] -= B10P9;
+				carry++;
+			}
+
+			if (carry > 0){
+				sum[a+b+1] += carry;
+				if ( sum[a+b+1] > MAX_B10P9){
+					sum[a+b+1] -= B10P9;
+					sum[a+b+2] += 1;
+				}
+			}
+		}
+	}
+
+	for (uint i=0; i<sum.size(); i++){
+		if (i == 0){
+			mul.value = sum[i];
+		} else {
+			mul.b10.emplace_back(sum[i]);
+		}
+	}
+
+    
+	return mul;
 }
 
-BigInteger BigInteger::divide(const BigInteger& bi) const
-{
-    BigInteger division;
-    if (bi == ZERO){
-        // division by zero
-    } else if (bi == ONE) {
-        division = (*this);
-    } else if (compare(bi) == 0) {
-        division = 1;
-    } else {
-        std::string dividend = this->m_value;
-        std::string quotient, cur_quotient;
-        std::reverse(dividend.begin(), dividend.end());
-        BigInteger bi_abs = bi.absolute();
-        do {
-            cur_quotient.push_back(dividend.back());
-            dividend.pop_back();
-            BigInteger bi_dividend(cur_quotient);
-            if (bi_dividend >= bi_abs){
-                BigInteger n = BigInteger(2);
-                while (bi_abs.multiply(n) <= bi_dividend){
-                    n++;
-                }
-                n--;
-                quotient.append(n.toString());
-                cur_quotient = bi_dividend.substract(bi_abs.multiply(n)).toString();
-            } else {
-                quotient.push_back('0');
-            }
-        } while (!dividend.empty());
-        division = BigInteger(quotient);        
-    }
-    bool positive = (this->m_signed && bi.m_signed) || (!this->m_signed && !bi.m_signed);
-    if (!positive){
-        division = division.negate();
-    }
-    return division;
-}
-
-BigInteger BigInteger::pow(const BigInteger& bi) const
-{
-    BigInteger ret;
-    if (bi == ZERO){
-        ret = ONE;
-    } else if (bi == ONE){
-        ret = (*this);
-    } else {
-        BigInteger initial_value = (*this);
-        ret = (*this);
-        for (BigInteger i=ONE; i<bi; i++){
-            ret *= initial_value;
-        }
-    }
-    return ret;
-}
-
-BigInteger BigInteger::modulus(const BigInteger& bi) const
-{
-    BigInteger mod = substract(bi.multiply(divide(bi)));
-    return mod;
-}
-
-int BigInteger::bitLength() const
-{
-    return toString(2).length();
-}
-
-int BigInteger::compare(const BigInteger& bi) const
-{
-    int comparison;
-    if (this->m_signed && !bi.m_signed){
-        // -a, +b
-        comparison = -1;
-    } else if (!this->m_signed && bi.m_signed){
-        // +a, -b
-        comparison = 1;
-    } else {
-        // +a, +b or -a, -b
-        if (this->m_value.length() < bi.m_value.length()){
-            comparison = -1;
-        } else if (this->m_value.length() > bi.m_value.length()){
-            comparison = 1;
-        } else {
-            bool positive = !this->m_signed;
-            if (this->m_value < bi.m_value){
-                comparison = (positive ? -1 : 1);
-            } else if (this->m_value > bi.m_value){
-                comparison = (positive ? 1 : -1);;
-            } else {
-                comparison = 0;
-            }
-        }
-    }
-    return comparison;
-}
-
-BigInteger BigInteger::negate() const
-{
-    std::string value = this->m_value;
-    return BigInteger((this->m_signed ? value : value.insert(0, 1, '-')));
-}
-
-BigInteger BigInteger::absolute() const
-{
-    return (isPositive() ? (*this) : negate());
-}
-
-bool BigInteger::isPositive() const
-{
-    return !this->m_signed;
-}
-
-bool BigInteger::isNegative() const
-{
-    return this->m_signed;
-}
-
-void BigInteger::swap(BigInteger &bi)
-{
-	BigInteger tmp = (*this);
-	(*this) = bi;
-	bi = tmp;
-}
-
-BigInteger BigInteger::operator+(const BigInteger& bi)
-{
-    return this->add(bi);
-}
-
-BigInteger BigInteger::operator-(const BigInteger& bi)
-{
-    return this->substract(bi);
-}
-
-BigInteger BigInteger::operator*(const BigInteger& bi)
-{
-    return this->multiply(bi);
-}
-
-BigInteger BigInteger::operator/(const BigInteger& bi)
-{
-    return this->divide(bi);
-}
-
-BigInteger BigInteger::operator%(const BigInteger& bi)
-{
-    return this->modulus(bi);
-}
-
-BigInteger BigInteger::operator<<(const BigInteger& bi) const
-{
-    std::string bitwise_val = toString(2);
-    for (BigInteger i = ZERO; i<bi; i++){
-        bitwise_val.push_back('0');
-    }
-    return BigInteger(bitwise_val, 2);
-}
-
-BigInteger BigInteger::operator>>(const BigInteger& bi) const
-{
-    std::string bitwise_val = toString(2);
-    for (BigInteger i = ZERO; i<bi && bitwise_val.length()>0; i++){
-        bitwise_val.pop_back();
-    }
-    if (bitwise_val.empty()){
-        bitwise_val.push_back('0');
-    }
-    return BigInteger(bitwise_val, 2);
-}
-
-BigInteger& BigInteger::operator+=(const BigInteger& bi)
-{
-    (*this) = add(bi);
-    return (*this);
-}
-
-BigInteger& BigInteger::operator-=(const BigInteger& bi)
-{
-    (*this) = substract(bi);
-    return (*this);
-}
-
-BigInteger& BigInteger::operator*=(const BigInteger& bi)
-{
-    (*this) = multiply(bi);
-    return (*this);
-}
-
-BigInteger& BigInteger::operator/=(const BigInteger& bi)
-{
-    (*this) = divide(bi);
-    return (*this);
-}
-
-BigInteger& BigInteger::operator--()
-{
-    (*this) = substract(ONE);
-    return (*this);
-}
-
-BigInteger BigInteger::operator--(int)
-{
-    BigInteger before_minus = (*this);
-    (*this) = substract(ONE);
-    return before_minus;
-}
-
-BigInteger& BigInteger::operator++()
-{
-    (*this) = add(ONE);
-    return (*this);
-}
-
-BigInteger BigInteger::operator++(int)
-{
-    BigInteger before_plus = (*this);
-    (*this) = add(ONE);
-    return before_plus;
-}
-
-bool BigInteger::operator==(const BigInteger& bi) const
-{
-    bool equal = (compare(bi) == 0);
-    return equal;
-}
-
-bool BigInteger::operator!=(const BigInteger& bi) const
-{
-    bool different = (compare(bi) != 0);
-    return different;
-}
-
-bool BigInteger::operator<(const BigInteger& bi) const
-{
-    bool less = (compare(bi) == -1);
-    return less;
-}
-
-bool BigInteger::operator>(const BigInteger& bi) const
-{
-    bool more = (compare(bi) == 1);
-    return more;
-}
-
-bool BigInteger::operator<=(const BigInteger& bi) const
-{
-    int cmp = compare(bi);
-    return (cmp == -1) || (cmp == 0);
-}
-
-bool BigInteger::operator>=(const BigInteger& bi) const
-{
-    int cmp = compare(bi);
-    return (cmp == 0) || (cmp == 1);
-}
-
-std::string BigInteger::toString(int radix) const
-{
-    std::stringstream ss;
-    if (m_signed){
-        ss << '-';
-    }
-    if (radix == 10){
-        ss << m_value;
-    } else {
-        BigInteger dec_val = (*this), modulo(radix);
-        std::string str;
-        while (dec_val != ZERO){
-            BigInteger remain = dec_val.modulus(modulo);
-            dec_val /= modulo;
-            char c = baseChar.at(std::stoi(remain.toString()));
-            str.push_back(c);
-        }
-        std::reverse(str.begin(), str.end());
-        ss << str;
-    }
-    return ss.str();
-}
