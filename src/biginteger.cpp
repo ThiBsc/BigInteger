@@ -175,8 +175,10 @@ BigInteger BigInteger::mul(const BigInteger& bi) const
 	BigInteger mul;
 
 	uint iterA = b10.size()+1,  iterB = bi.b10.size()+1;
-	// <pow, val>
-	std::map<uint, uint> sum;
+
+	// sum[pow] = val;
+	size_t size = std::max(iterA, iterB) + 2; // +2 to avoid too lower size
+	uint32_t *sum = new uint32_t[size]();
 
 	for (uint a=0; a<iterA; a++){
 		uint32_t va = (a == 0 ? value : b10[a-1]);
@@ -185,33 +187,21 @@ BigInteger BigInteger::mul(const BigInteger& bi) const
 			uint32_t result, carry = 0;
 			result = multiply(va, vb, &carry);
 
-			uint32_t ocarry = carry;
-			
-			if (result > MAX_B10P9){
-				uint32_t result_carry = (result/B10P9);
-				result -= (result_carry*B10P9);
-				carry += result_carry;
-			}
-			
-			// to convert the result from 2^32 to 10^9
-			for (uint32_t i=0; i<ocarry; i++){
-				result += (UINT32_MAX - (uint32_t(4)*B10P9))+1;
-				carry += 3;
-				if (result > MAX_B10P9){
-					uint32_t result_carry = (result/B10P9);
-					result -= (result_carry*B10P9);
-					carry++;
-				}
-			}
+			// Convert from 2^32 to 10^9
+			uint64_t reconstitued = ((uint64_t(carry) << 32) | result);
 
-			sum[a+b] += result;
+			// split the b10^9 carry and value
+			uint32_t b10carry = reconstitued / B10P9;
+			uint32_t b10val = reconstitued - (b10carry * B10P9);
+
+			sum[a+b] += b10val;
 			if ( sum[a+b] > MAX_B10P9){
 				sum[a+b] -= B10P9;
-				carry++;
+				b10carry++;
 			}
 
-			if (carry > 0){
-				sum[a+b+1] += carry;
+			if (b10carry > 0){
+				sum[a+b+1] += b10carry;
 				if ( sum[a+b+1] > MAX_B10P9){
 					sum[a+b+1] -= B10P9;
 					sum[a+b+2] += 1;
@@ -220,7 +210,7 @@ BigInteger BigInteger::mul(const BigInteger& bi) const
 		}
 	}
 
-	for (uint i=0; i<sum.size(); i++){
+	for (uint i=0; i<size; i++){
 		if (i == 0){
 			mul.value = sum[i];
 		} else {
@@ -228,6 +218,9 @@ BigInteger BigInteger::mul(const BigInteger& bi) const
 		}
 	}
 
+	mul.b10.erase(std::remove(mul.b10.begin(), mul.b10.end(), 0), mul.b10.end());
+
+	delete [] sum;
     
 	return mul;
 }
